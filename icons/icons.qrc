@@ -1,0 +1,16 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+	<file>play.png</file>
+	<file>pause.png</file>
+	<file>stop.png</file>
+	<file>previous.png</file>
+	<file>forward.png</file>
+	<file>record.png</file>
+	<file>Local.png</file>
+	<file>Server.png</file>
+	<file>Display.png</file>
+	<file>Local_grey.png</file>
+	<file>Server_grey.png</file>
+	<file>Display_grey.png</file>
+</qresource>
+</RCC>
