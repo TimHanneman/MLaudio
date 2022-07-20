@@ -100,7 +100,7 @@
      <string/>
     </property>
     <property name="icon">
-     <iconset resource="icons/icons.qrc">
+     <iconset resource="../icons/icons.qrc">
       <normaloff>:/play.png</normaloff>:/play.png</iconset>
     </property>
     <property name="iconSize">
@@ -285,19 +285,6 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPlainTextEdit" name="plainTextEdit_line">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>70</y>
-      <width>41</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Current Line Number, or Count</string>
-    </property>
-   </widget>
    <widget class="QGraphicsView" name="WAV_Graph2">
     <property name="geometry">
      <rect>
@@ -338,6 +325,16 @@
     </property>
     <property name="text">
      <string>Back</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>70</y>
+      <width>31</width>
+      <height>61</height>
+     </rect>
     </property>
    </widget>
   </widget>
@@ -392,7 +389,6 @@
  </widget>
  <tabstops>
   <tabstop>lineEdit_filename</tabstop>
-  <tabstop>plainTextEdit_line</tabstop>
   <tabstop>Play1</tabstop>
   <tabstop>Stop1</tabstop>
   <tabstop>Record1</tabstop>
@@ -405,7 +401,7 @@
   <tabstop>Wav_Graph1</tabstop>
  </tabstops>
  <resources>
-  <include location="icons/icons.qrc"/>
+  <include location="../icons/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

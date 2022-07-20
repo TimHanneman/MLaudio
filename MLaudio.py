@@ -23,7 +23,7 @@ base_file_name = "audio"
 save_location = "./"
 transcript_file = "False"
 audio_clips = "False"
-mode = "local" #Local, Server, Display
+mode = "Local" #Local, Server, Display
     #Network Settings#
 current_ip = "127.0.0.1"
 srv_prt = 8080
@@ -48,10 +48,13 @@ class MLaudio(QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        
+        self.update()
         self.ui.actionPreferences.triggered.connect(lambda: self.preference(mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt))
         ###self.ui.Next_btn.clicked.connect(self.preference)
         self.ui.actionAudio_Settings.triggered.connect(self.audio_set)
+        
+        self.ui.lineEdit.editingFinished.connect(lambda: self.line_num_update(self.ui.lineEdit.text()))
+        
         
         
         
@@ -70,14 +73,20 @@ class MLaudio(QMainWindow):
         
         pref = PreferencesDialog(mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt)
         pref.exec()
+        self.update()
     
     #open the documentation?
     def Manual():
         pass
     
     #If the transcript is set, and the line number is changed
-    def line_num_update():
-        pass
+    def line_num_update(self, nn):
+        global line_num
+        line_num = int(nn)
+        if nn == "":
+            line_num = 0
+        self.ui.lineEdit.setText(str(nn))
+        self.ui.lineEdit_filename.setText(base_file_name+str(line_num))
     
     def play():
         pass
@@ -99,6 +108,11 @@ class MLaudio(QMainWindow):
     
     def next_samp():
         pass
+    
+    def update(self):
+        self.ui.lineEdit_filename.setText(base_file_name+str(line_num))
+        self.ui.lineEdit.setText(str(line_num))
+        self.ui.Mode_Lb.setText("Mode: "+mode)
     
 #Classes below are specifically to generate dialogs for changing the settings.
 
@@ -123,16 +137,21 @@ class PreferencesDialog(QDialog):
         
         self.Premote_ip = oremote_ip
         self.Premote_prt = oremote_prt
+       
         
         #Ui init & wiring
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
+        
+        self.cur_Pmode(self.Pmode)
+        
         #self.ui.radioButton_3.setHidden(True)
-        self.ui.radioButton_3.toggled.connect(self.set_Pmode(1))
-        self.ui.radioButton_4.toggled.connect(self.set_Pmode(2))
-        self.ui.radioButton_5.toggled.connect(self.set_Pmode(3))
+        self.ui.radioButton_3.toggled.connect(lambda: self.set_Pmode(1))
+        self.ui.radioButton_4.toggled.connect(lambda: self.set_Pmode(2))
+        self.ui.radioButton_5.toggled.connect(lambda: self.set_Pmode(3))
         
         self.ui.checkBox_filena.stateChanged.connect(lambda: self.set_Pbase_file_name(self.ui.checkBox_filena.isChecked()))
+        self.ui.txt_filena.editingFinished.connect(lambda: self.set_cus_Pbase_file_name(self.ui.txt_filena.text()))
         self.ui.txt_SavLoc.editingFinished.connect(lambda: self.set_P_save_location(self.ui.txt_SavLoc.text()))
         
         self.ui.checkBox_trns.stateChanged.connect(lambda: self.set_P_transcript_file(self.ui.checkBox_trns.isChecked()))
@@ -232,10 +251,15 @@ class PreferencesDialog(QDialog):
             self.Pbase_file_name = "audio"
             self.ui.txt_filena.setText(self.Pbase_file_name)
         print(self.Pbase_file_name)
+    
+    @Slot()
+    def set_cus_Pbase_file_name(self,na):
+        self.Pbase_file_name = na
         
     #The idea is to set all the settings that are unaccessible to non-error state defaults.     #####Might need to change these after further development such as the IP settings
     @Slot()
     def set_Pmode(self,m):
+        print("M is"+ str(m))
         if m == 1:
             self.Pmode = "Local"
             self.Premote_ip = "127.0.0.1"
@@ -258,6 +282,14 @@ class PreferencesDialog(QDialog):
             
             self.Pcurrent_ip = "127.0.0.1"
             self.Psrv_prt = 8080
+    
+    def cur_Pmode(self,m):
+        if m == "Local":
+            self.ui.radioButton_3.setChecked(True)
+        elif m == "Server":
+            self.ui.radioButton_4.setChecked(True)
+        elif m == "Display":
+            self.ui.radioButton_5.setChecked(True)
     
     ##### Write the configuration to a file that can be loaded???
     @Slot()
@@ -370,10 +402,7 @@ class AudioDialog(QDialog):
         bits = self.Dbits
         channels = self.Dchannels
 
-        
-        
-            
-    
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

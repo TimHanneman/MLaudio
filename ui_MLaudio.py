@@ -17,9 +17,8 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QGraphicsView, QLabel, QLineEdit,
-    QMainWindow, QMenu, QMenuBar, QPlainTextEdit,
-    QPushButton, QSizePolicy, QStatusBar, QTextBrowser,
-    QWidget)
+    QMainWindow, QMenu, QMenuBar, QPushButton,
+    QSizePolicy, QStatusBar, QTextBrowser, QWidget)
 import icons_rc
 
 class Ui_MainWindow(object):
@@ -98,9 +97,6 @@ class Ui_MainWindow(object):
         self.Transcript_brw = QTextBrowser(self.centralwidget)
         self.Transcript_brw.setObjectName(u"Transcript_brw")
         self.Transcript_brw.setGeometry(QRect(50, 70, 561, 61))
-        self.plainTextEdit_line = QPlainTextEdit(self.centralwidget)
-        self.plainTextEdit_line.setObjectName(u"plainTextEdit_line")
-        self.plainTextEdit_line.setGeometry(QRect(10, 70, 41, 61))
         self.WAV_Graph2 = QGraphicsView(self.centralwidget)
         self.WAV_Graph2.setObjectName(u"WAV_Graph2")
         self.WAV_Graph2.setGeometry(QRect(50, 310, 551, 81))
@@ -110,6 +106,9 @@ class Ui_MainWindow(object):
         self.pushButton = QPushButton(self.centralwidget)
         self.pushButton.setObjectName(u"pushButton")
         self.pushButton.setGeometry(QRect(140, 410, 80, 22))
+        self.lineEdit = QLineEdit(self.centralwidget)
+        self.lineEdit.setObjectName(u"lineEdit")
+        self.lineEdit.setGeometry(QRect(10, 70, 31, 61))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
@@ -126,8 +125,7 @@ class Ui_MainWindow(object):
         self.Mode_Lb.setBuddy(self.Next_btn)
         self.label_2.setBuddy(self.lineEdit_filename)
 #endif // QT_CONFIG(shortcut)
-        QWidget.setTabOrder(self.lineEdit_filename, self.plainTextEdit_line)
-        QWidget.setTabOrder(self.plainTextEdit_line, self.Play1)
+        QWidget.setTabOrder(self.lineEdit_filename, self.Play1)
         QWidget.setTabOrder(self.Play1, self.Stop1)
         QWidget.setTabOrder(self.Stop1, self.Record1)
         QWidget.setTabOrder(self.Record1, self.Play2)
@@ -199,9 +197,6 @@ class Ui_MainWindow(object):
         self.Next_btn.setToolTip(QCoreApplication.translate("MainWindow", u"Will save current recording if recorded. Update filenames, load next clip, next transcript line.", None))
 #endif // QT_CONFIG(tooltip)
         self.Next_btn.setText(QCoreApplication.translate("MainWindow", u"Next", None))
-#if QT_CONFIG(tooltip)
-        self.plainTextEdit_line.setToolTip(QCoreApplication.translate("MainWindow", u"Current Line Number, or Count", None))
-#endif // QT_CONFIG(tooltip)
 #if QT_CONFIG(tooltip)
         self.WAV_Graph2.setToolTip(QCoreApplication.translate("MainWindow", u"Wave form to record. Try to match the wave form above.", None))
 #endif // QT_CONFIG(tooltip)
