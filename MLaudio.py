@@ -6,7 +6,7 @@ Created on Mon Jul 11 13:49:40 2022
 @author: tim
 """
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
+from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog, QWidget
 from PySide6.QtCore import Signal, Qt, Slot
 from ui_MLaudio import Ui_MainWindow
 from ui_Preference import Ui_Dialog
@@ -17,6 +17,7 @@ import wave
 
 #Settings Variables#
 ## Preferences ##
+
 line_num = 0
 base_file_name = "audio"
 save_location = "./"
@@ -48,7 +49,7 @@ class MLaudio(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         
-        self.ui.actionPreferences.triggered.connect(self.preference)
+        self.ui.actionPreferences.triggered.connect(lambda: self.preference(mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt))
         ###self.ui.Next_btn.clicked.connect(self.preference)
         self.ui.actionAudio_Settings.triggered.connect(self.audio_set)
         
@@ -63,12 +64,11 @@ class MLaudio(QMainWindow):
         print(channels)
         print(hz)
 
-        
     #open the other preference menu
     @Slot()
-    def preference(self):
+    def preference(self,mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt):
         
-        pref = PreferencesDialog()
+        pref = PreferencesDialog(mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt)
         pref.exec()
     
     #open the documentation?
@@ -102,66 +102,192 @@ class MLaudio(QMainWindow):
     
 #Classes below are specifically to generate dialogs for changing the settings.
 
+#The classes need to accept inputs into their constructor.
 class PreferencesDialog(QDialog):
     
-    Pmode = "local" #Local, Server, Display
-
-    Pbase_file_name = "audio"
-    Psave_location = "./"
-    Ptranscript_file = "False"
-    Paudio_clips = "False"
-    Pline_num = 0
-    
-
-    Pcurrent_ip = "127.0.0.1"
-    Psrv_prt = 8080
-    
-    Premote_ip = "127.0.0.1"
-    Premote_prt = 8080
-    
-    
-    def __init__(self):
+    def __init__(self, o_mode, obase_file_name, osave_location, otranscript_file, oaudio_clips, opline_num, ocurrent_ip, osrv_prt, oremote_ip, oremote_prt):
         super().__init__()
         
+        #Variable Init
+        self.Pmode = o_mode
+
+        self.Pbase_file_name = obase_file_name
+        self.Psave_location = osave_location
+        self.Ptranscript_file = otranscript_file
+        self.Paudio_clips = oaudio_clips
+        self.Pline_num = opline_num
+        
+
+        self.Pcurrent_ip = ocurrent_ip
+        self.Psrv_prt = osrv_prt
+        
+        self.Premote_ip = oremote_ip
+        self.Premote_prt = oremote_prt
+        
+        #Ui init & wiring
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
         #self.ui.radioButton_3.setHidden(True)
+        self.ui.radioButton_3.toggled.connect(self.set_Pmode(1))
+        self.ui.radioButton_4.toggled.connect(self.set_Pmode(2))
+        self.ui.radioButton_5.toggled.connect(self.set_Pmode(3))
+        
+        self.ui.checkBox_filena.stateChanged.connect(lambda: self.set_Pbase_file_name(self.ui.checkBox_filena.isChecked()))
+        self.ui.txt_SavLoc.editingFinished.connect(lambda: self.set_P_save_location(self.ui.txt_SavLoc.text()))
+        
+        self.ui.checkBox_trns.stateChanged.connect(lambda: self.set_P_transcript_file(self.ui.checkBox_trns.isChecked()))
+        self.ui.txt_AudClip.editingFinished.connect(lambda: self.set_Paudio_clips(self.ui.txt_AudClip.text()))
+        self.ui.txt_linNum.editingFinished.connect(lambda: self.set_Pline_num(self.ui.txt_linNum.text()))
+        
+        self.ui.txt_SrvIP.editingFinished.connect(lambda: self.set_Pcurrent_ip(self.ui.txt_SrvIP.text()))
+        self.ui.txt_SrvPrt.editingFinished.connect(lambda: self.set_Psrv_prt(self.ui.txt_SrvPrt.text()))
+        self.ui.txt_remote_ip.editingFinished.connect(lambda: self.set_Premote_ip(self.ui.txt_remote_ip.text()))
+        self.ui.txt_remote_prt.editingFinished.connect(lambda: self.set_Premote_prt(self.ui.txt_remote_prt.text()))
     
-    def set_Premote_prt(rprt):
-        pass
+        self.ui.connect_btn.clicked.connect(self.chk_Connect)
+        self.ui.pushButton_2.clicked.connect(self.save_cur_conf)
+        self.ui.df_config_btn.accepted.connect(lambda: self.apply_pref(self.Pmode, self.Pbase_file_name, self.Psave_location, self.Ptranscript_file, self.Paudio_clips, self.Pline_num, self.Pcurrent_ip, self.Psrv_prt, self.Premote_ip, self.Premote_prt))
+        
+    #### When Networking is implemented update this to check connection
+    @Slot()
+    def chk_Connect(self):
+        print("CHECKING!")
+        
+    ##### Check that the input is a valid port number.
+    @Slot()
+    def set_Premote_prt(self,rprt):
+        self.Premote_prt = rprt
+        if rprt == "":
+            self.Premote_prt == 8080
+        print(self.Premote_prt)
     
-    def set_Premote_ip(rip):
-        pass
+    ##### When the mode changes be sure to clear the settings out.
+    ##### Check that it has a valid IP address
+    @Slot()
+    def set_Premote_ip(self,rip):
+        self.Premote_ip = rip
+        if rip == "":
+            self.Premote_ip = "127.0.0.1"
+        print(self.Premote_ip)
     
-    def set_Psrv_prt(sprt):
-        pass
+    ##### Check that the input is a valid port number.
+    @Slot()
+    def set_Psrv_prt(self,sprt):
+        self.Psrv_prt = sprt
+        if sprt == "":
+            self.Psrv_prt = 8080
+        print(self.Psrv_prt)
         
-    def set_Pcurrent_ip(pip):
-        pass
+    ##### When the mode changes be sure to clear the settings out.
+    ##### Check that it has a valid IP address
+    @Slot()
+    def set_Pcurrent_ip(self,pip):
+        self.Pcurrent_ip = pip
+        if pip == "":
+            self.Pcurrent_ip = "127.0.0.1"
+        print(self.Pcurrent_ip)
         
-    def set_Pline_num(n):
-        pass
-        
-    def set_Paudio_clips(aud):
-        pass
-        
-    def set_P_transcript_file(tra):
-        pass
-        
-    def set_P_save_location(loc):
-        pass
-        
-    def set_Pbase_file_name(na):
-        pass
-        
-    def set_Pmode(m):
-        pass
+    ##### Check that n is a number / restrict it to only numbers or empty.
+    @Slot()
+    def set_Pline_num(self,n):
+        self.Pline_num = n
+        if n == "":
+            self.Pline_num = 0
+        print(self.Pline_num)
     
-    def save_cur_conf():
-        pass
+    ##### What happens if the string is an invalid path?
+    @Slot()
+    def set_Paudio_clips(self,aud):
+        self.Paudio_clips = aud
+        if aud == "":
+            self.Paudio_clips = "False"
+        print(self.Paudio_clips)
         
-    def apply_pref():
-        pass
+    ##### What happens if no file is selected?
+    @Slot()
+    def set_P_transcript_file(self,tra):
+        if tra == True:
+            w = QWidget()
+            w.resize(320,240)
+            w.setWindowTitle("Select Transcript File")
+            self.Ptranscript_file = QFileDialog.getOpenFileName(w, 'Open File', '/')            
+        else:
+            self.Ptranscript_file = ""
+        print(self.Ptranscript_file)
+    
+    ##### What happens if the string is an invalid path?
+    @Slot()
+    def set_P_save_location(self,loc):
+        self.Psave_location = loc
+        if loc == "":
+            self.Psave_location = "/"
+        print(self.Psave_location)
+        
+    def set_Pbase_file_name(self, na):
+        if na == True:
+            self.Pbase_file_name = ""
+            self.ui.txt_filena.setText(self.Pbase_file_name)
+
+        elif na == False:
+            self.Pbase_file_name = "audio"
+            self.ui.txt_filena.setText(self.Pbase_file_name)
+        print(self.Pbase_file_name)
+        
+    #The idea is to set all the settings that are unaccessible to non-error state defaults.     #####Might need to change these after further development such as the IP settings
+    @Slot()
+    def set_Pmode(self,m):
+        if m == 1:
+            self.Pmode = "Local"
+            self.Premote_ip = "127.0.0.1"
+            self.Premote_prt = 8080
+            self.Pcurrent_ip = "127.0.0.1"
+            self.Psrv_prt = 8080
+            
+        elif m == 2:
+            self.Pmode = "Server"
+            self.Premote_ip = "127.0.0.1"
+            self.Premote_prt = 8080
+
+        else:
+            self.Pmode = "Display"
+            self.Pbase_file_name = "temp"
+            self.Psave_location = "./temp"
+            self.Ptranscript_file = "./temp/transcript"
+            self.Paudio_clips = "./temp/Paudio"
+            self.Pline_num = 0
+            
+            self.Pcurrent_ip = "127.0.0.1"
+            self.Psrv_prt = 8080
+    
+    ##### Write the configuration to a file that can be loaded???
+    @Slot()
+    def save_cur_conf(self):
+        print("not implemented")
+        
+    @Slot()
+    def apply_pref(self, Pmode, Pbase_file_name, Psave_location,Ptranscript_file, Paudio_clips, Pline_num, Pcurrent_ip, Psrv_prt, Premote_ip, Premote_prt):
+        print("applied")
+        global base_file_name
+        global save_location
+        global transcript_file
+        global audio_clips
+        global line_num
+        global current_ip
+        global srv_prt
+        global remote_ip
+        global remote_prt
+        global mode
+        
+        base_file_name = self.Pbase_file_name
+        save_location = self.Psave_location
+        transcript_file = self.Ptranscript_file
+        audio_clips = self.Paudio_clips
+        line_num = self.Pline_num
+        current_ip = self.Pcurrent_ip
+        srv_prt = self.Psrv_prt
+        remote_ip = self.Premote_ip
+        remote_prt = self.Premote_prt
+        mode = self.Pmode
 
 
 class AudioDialog(QDialog):

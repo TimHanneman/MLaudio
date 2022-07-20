@@ -32,10 +32,10 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>10</y>
+     <x>10</x>
+     <y>20</y>
      <width>57</width>
-     <height>14</height>
+     <height>16</height>
     </rect>
    </property>
    <property name="text">
@@ -47,7 +47,7 @@
     <rect>
      <x>10</x>
      <y>40</y>
-     <width>212</width>
+     <width>161</width>
      <height>392</height>
     </rect>
    </property>
@@ -334,22 +334,6 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox_AudClip">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>110</y>
-      <width>101</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Folder location of pre-recorded audio clips to load.</string>
-    </property>
-    <property name="text">
-     <string>Audio Clips:</string>
-    </property>
-   </widget>
    <widget class="QLineEdit" name="txt_SrvIP">
     <property name="enabled">
      <bool>false</bool>
@@ -428,6 +412,19 @@
     </property>
     <property name="text">
      <string>Save Location:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_10">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>110</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Audio Clips:</string>
     </property>
    </widget>
   </widget>
@@ -566,7 +563,6 @@
   <tabstop>txt_SavLoc</tabstop>
   <tabstop>checkBox_trns</tabstop>
   <tabstop>txt_trns</tabstop>
-  <tabstop>checkBox_AudClip</tabstop>
   <tabstop>txt_AudClip</tabstop>
   <tabstop>txt_SrvIP</tabstop>
   <tabstop>txt_SrvPrt</tabstop>
@@ -578,7 +574,7 @@
   <tabstop>pushButton_2</tabstop>
  </tabstops>
  <resources>
-  <include location="icons/icons.qrc"/>
+  <include location="../icons/icons.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -610,22 +606,6 @@
     <hint type="destinationlabel">
      <x>455</x>
      <y>130</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBox_AudClip</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>txt_AudClip</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>230</x>
-     <y>159</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>455</x>
-     <y>160</y>
     </hint>
    </hints>
   </connection>
@@ -754,22 +734,6 @@
     <hint type="destinationlabel">
      <x>314</x>
      <y>162</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioButton_5</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>checkBox_AudClip</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>126</x>
-     <y>397</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>200</x>
-     <y>166</y>
     </hint>
    </hints>
   </connection>
