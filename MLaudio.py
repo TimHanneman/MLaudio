@@ -12,11 +12,18 @@ from ui_MLaudio import Ui_MainWindow
 from ui_Preference import Ui_Dialog
 from ui_AudioSettings import Ui_Dialog_Aud
 
+import sys, os, atexit
+
+
 import pyaudio
 import wave
 
 #Settings Variables#
 ## Preferences ##
+#If I was smart before coding all of this I would have made a settings class
+#and just have used a single object for this.
+
+cwd = os.getcwd()
 
 line_num = 0
 base_file_name = "audio"
@@ -31,6 +38,8 @@ remote_ip = "127.0.0.1"
 remote_prt = 8080
 
 ## Audio Settings ##
+filename1 = ""
+filename2 = ""
 input_src = 0
 output_src = 0 #
 hz = 44100
@@ -40,7 +49,12 @@ channels = 1
 currently_write_filename = base_file_name + str(line_num)
 
 
-
+def set_cwd(new_dir):
+    try:
+        os.chdir(new_dir)
+        cwd = os.getcwd()
+    except:
+        print('failed to change current working directory')
 
 class MLaudio(QMainWindow):
     
@@ -54,7 +68,7 @@ class MLaudio(QMainWindow):
         self.ui.actionAudio_Settings.triggered.connect(self.audio_set)
         
         self.ui.lineEdit.editingFinished.connect(lambda: self.line_num_update(self.ui.lineEdit.text()))
-        
+        self.ui.Play1.clicked.connect(self.play)
         
         
         
@@ -88,8 +102,30 @@ class MLaudio(QMainWindow):
         self.ui.lineEdit.setText(str(nn))
         self.ui.lineEdit_filename.setText(base_file_name+str(line_num))
     
-    def play():
-        pass
+    @Slot()
+    def play(self):
+        
+        global filename1
+        
+        if filename1 != "":
+            chunk = 1024
+            aud1 = wave.open(filename1, 'rb')
+            pa = pyaudio.PyAudio()
+            stream = pa.open(format = pa.get_format_from_width(aud1.getsampwidth()),
+                         channels = aud1.getnchannels(),
+                         rate = aud1.getframerate(),
+                         output = True)
+            rd_data = aud1.readframes(chunk)
+        
+            while rd_data != '':
+                stream.write(rd_data)
+                rd_data = aud1.readframes(chunk)
+        
+            stream.stop_stream()
+            stream.close()
+            pa.terminate()
+        else:
+            print("No filename1 audio file")
     
     def stop():
         pass
@@ -110,9 +146,29 @@ class MLaudio(QMainWindow):
         pass
     
     def update(self):
+        
+        global audio_clips
+        global filename1
+        
         self.ui.lineEdit_filename.setText(base_file_name+str(line_num))
         self.ui.lineEdit.setText(str(line_num))
         self.ui.Mode_Lb.setText("Mode: "+mode)
+        
+        '''if save location is set then retrive a list of filenames from that directory'''
+        '''Assign the nth filename in the audio_clips folder to filename1'''
+        if audio_clips != "False":
+            
+            try:
+                dir_list = os.listdir(audio_clips)
+                filename1 = audio_clips + "/" + dir_list[line_num]
+                print(filename1)
+            except:
+                print("setting filename1 failed")
+                filename1 = ""
+                audio_clips = "False"
+        else:
+            filename1 = ""
+            dir_list = ""
     
 #Classes below are specifically to generate dialogs for changing the settings.
 
@@ -401,8 +457,6 @@ class AudioDialog(QDialog):
         hz = self.Dhz
         bits = self.Dbits
         channels = self.Dchannels
-
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
