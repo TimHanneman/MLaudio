@@ -25,7 +25,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(640, 480)
+        Dialog.resize(643, 481)
         self.df_config_btn = QDialogButtonBox(Dialog)
         self.df_config_btn.setObjectName(u"df_config_btn")
         self.df_config_btn.setGeometry(QRect(450, 440, 181, 32))
@@ -124,6 +124,9 @@ class Ui_Dialog(object):
         self.checkBox_filena = QCheckBox(self.frame)
         self.checkBox_filena.setObjectName(u"checkBox_filena")
         self.checkBox_filena.setGeometry(QRect(0, 20, 111, 20))
+        font = QFont()
+        font.setPointSize(8)
+        self.checkBox_filena.setFont(font)
         self.checkBox_filena.setChecked(True)
         self.txt_SrvIP = QLineEdit(self.frame)
         self.txt_SrvIP.setObjectName(u"txt_SrvIP")
@@ -267,7 +270,7 @@ class Ui_Dialog(object):
 #if QT_CONFIG(tooltip)
         self.checkBox_filena.setToolTip(QCoreApplication.translate("Dialog", u"text that will be used to name recordings", None))
 #endif // QT_CONFIG(tooltip)
-        self.checkBox_filena.setText(QCoreApplication.translate("Dialog", u"Base Filename:", None))
+        self.checkBox_filena.setText(QCoreApplication.translate("Dialog", u"User2 Filename:", None))
 #if QT_CONFIG(tooltip)
         self.label_7.setToolTip(QCoreApplication.translate("Dialog", u"Set computer ip if in server mode.", None))
 #endif // QT_CONFIG(tooltip)

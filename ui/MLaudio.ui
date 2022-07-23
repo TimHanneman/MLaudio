@@ -36,31 +36,12 @@
      <cstring>Next_btn</cstring>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>10</y>
-      <width>131</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>filename that current recording will have</string>
-    </property>
-    <property name="text">
-     <string>Currently Writing file:</string>
-    </property>
-    <property name="buddy">
-     <cstring>lineEdit_filename</cstring>
-    </property>
-   </widget>
    <widget class="QLineEdit" name="lineEdit_filename">
     <property name="geometry">
      <rect>
-      <x>270</x>
-      <y>10</y>
-      <width>331</width>
+      <x>400</x>
+      <y>280</y>
+      <width>201</width>
       <height>22</height>
      </rect>
     </property>
@@ -236,27 +217,27 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>260</x>
       <y>160</y>
       <width>141</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>Player 1 Audio (Target)</string>
+     <string>User 1 Audio (Target)</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>270</x>
       <y>280</y>
-      <width>161</width>
+      <width>121</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>Player 2 Audio (Client)</string>
+     <string>User 2: File Name</string>
     </property>
    </widget>
    <widget class="QPushButton" name="Next_btn">
@@ -335,6 +316,53 @@
       <width>31</width>
       <height>61</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_filename_target">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>160</y>
+      <width>201</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>20</y>
+      <width>57</width>
+      <height>14</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Status:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>10</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Waiting</string>
     </property>
    </widget>
   </widget>

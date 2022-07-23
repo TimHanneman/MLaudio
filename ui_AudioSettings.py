@@ -18,7 +18,12 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QLabel,
     QPushButton, QSizePolicy, QVBoxLayout, QWidget)
 
+import sounddevice as sd
+
+aud_dev = sd.query_devices()
+
 class Ui_Dialog_Aud(object):
+    
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
@@ -32,6 +37,8 @@ class Ui_Dialog_Aud(object):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.label = QLabel(self.verticalLayoutWidget)
         self.label.setObjectName(u"label")
+
+        global aud_dev
 
         self.verticalLayout.addWidget(self.label)
 
@@ -81,6 +88,22 @@ class Ui_Dialog_Aud(object):
 
         self.verticalLayout.addWidget(self.comboBox)
 
+
+        
+        self.label_4 = QLabel(self.verticalLayoutWidget)
+        self.label_4.setObjectName(u"label_4")
+        self.verticalLayout.addWidget(self.label_4)
+        
+        self.comboBox_4 = QComboBox(self.verticalLayoutWidget)
+        self.label_4.setText(QCoreApplication.translate("Dialog","Recording_Device", None))
+        for i, d in enumerate(aud_dev):
+            self.comboBox_4.addItem("")
+        
+        self.comboBox_4.setObjectName(u"comboBox_4")
+        
+        self.comboBox_4.setLayoutDirection(Qt.LeftToRight)
+        self.verticalLayout.addWidget(self.comboBox_4)
+        
         self.pushButton = QPushButton(self.verticalLayoutWidget)
         self.pushButton.setObjectName(u"pushButton")
 
@@ -97,9 +120,13 @@ class Ui_Dialog_Aud(object):
 
 
         QMetaObject.connectSlotsByName(Dialog)
+        
     # setupUi
 
     def retranslateUi(self, Dialog):
+        
+        global aud_dev
+        
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Audio Settings", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"Channels", None))
         self.comboBox_2.setItemText(0, QCoreApplication.translate("Dialog", u"Mono", None))
@@ -124,6 +151,9 @@ class Ui_Dialog_Aud(object):
         self.comboBox.setItemText(10, QCoreApplication.translate("Dialog", u"192000", None))
         self.comboBox.setItemText(11, QCoreApplication.translate("Dialog", u"352800", None))
         self.comboBox.setItemText(12, QCoreApplication.translate("Dialog", u"384000", None))
+        
+        for i, d in enumerate(aud_dev):
+            self.comboBox_4.setItemText(i, QCoreApplication.translate("Dialog", d['name'], None))
 
         self.pushButton.setText(QCoreApplication.translate("Dialog", u"Ok", None))
     # retranslateUi

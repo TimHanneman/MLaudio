@@ -2,32 +2,36 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Jul 11 13:49:40 2022
-
+Not gonna lie this code is a mess, but it gets the job done.
 @author: tim
 """
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog, QWidget
+from PySide6.QtWidgets import (QApplication, QMainWindow, QDialog, QFileDialog, QWidget,
+                               QLabel, QComboBox, QVBoxLayout)
 from PySide6.QtCore import Signal, Qt, Slot
 from ui_MLaudio import Ui_MainWindow
 from ui_Preference import Ui_Dialog
 from ui_AudioSettings import Ui_Dialog_Aud
 
-import sys, os, atexit
+import sys, os, atexit, time
+import threading
 
 
-import pyaudio
-import wave
+import sounddevice as sd
+import soundfile as sf
+from scipy.io.wavfile import write
 
 #Settings Variables#
 ## Preferences ##
-#If I was smart before coding all of this I would have made a settings class
+#TODO If I was smart before coding all of this I would have made a settings class
 #and just have used a single object for this.
 
 cwd = os.getcwd()
 
 line_num = 0
 base_file_name = "audio"
-save_location = "./"
+user1_file_name = "usr1_aud"
+save_location = cwd
 transcript_file = "False"
 audio_clips = "False"
 mode = "Local" #Local, Server, Display
@@ -44,7 +48,8 @@ input_src = 0
 output_src = 0 #
 hz = 44100
 bits = 32
-channels = 1
+channelz = 1
+recording = 0
 
 currently_write_filename = base_file_name + str(line_num)
 
@@ -61,6 +66,7 @@ class MLaudio(QMainWindow):
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
+        
         self.ui.setupUi(self)
         self.update()
         self.ui.actionPreferences.triggered.connect(lambda: self.preference(mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt))
@@ -68,7 +74,15 @@ class MLaudio(QMainWindow):
         self.ui.actionAudio_Settings.triggered.connect(self.audio_set)
         
         self.ui.lineEdit.editingFinished.connect(lambda: self.line_num_update(self.ui.lineEdit.text()))
-        self.ui.Play1.clicked.connect(self.play)
+        self.ui.Play1.clicked.connect(lambda: self.play(filename1))
+        #self.ui.Play1.clicked.connect(lambda: self.playt(filename1))
+        self.ui.Stop1.clicked.connect(self.stop)
+        self.ui.lineEdit_filename_target.setEnabled(False)
+        self.ui.Record2.clicked.connect(self.record2)
+        self.ui.Next_btn.clicked.connect(self.next_samp)
+        self.ui.pushButton.clicked.connect(self.back_samp)
+        self.ui.Stop2.clicked.connect(self.stop2)
+        self.ui.Play2.clicked.connect(self.play2)
         
         
         
@@ -78,8 +92,10 @@ class MLaudio(QMainWindow):
         aud = AudioDialog()
         aud.exec()
         print(bits)
-        print(channels)
+        print(channelz)
         print(hz)
+        print(input_src)
+        self.update()
 
     #open the other preference menu
     @Slot()
@@ -96,55 +112,143 @@ class MLaudio(QMainWindow):
     #If the transcript is set, and the line number is changed
     def line_num_update(self, nn):
         global line_num
+        global currently_write_filename
         line_num = int(nn)
         if nn == "":
             line_num = 0
         self.ui.lineEdit.setText(str(nn))
         self.ui.lineEdit_filename.setText(base_file_name+str(line_num))
+        self.update()
+        currently_write_filename = base_file_name + str(line_num)
     
+    #TODO It seems like I should allow the play button to be clicked only once and stop button clicked only once.
+    #       I'm guessing that the audio package is not thread safe. One way I could implement this is by having only 1 button. if playing then it stops the audio.
     @Slot()
-    def play(self):
-        
-        global filename1
-        
+    def play(self, filename):
+        t1 = threading.Thread(target=self.playt, args=(filename,),daemon=True)
+        t1.start()
+        print("thread end?")
+
+            
+    def playt(self, filename):
+        #TODO probably need to detect dtype
         if filename1 != "":
-            chunk = 1024
-            aud1 = wave.open(filename1, 'rb')
-            pa = pyaudio.PyAudio()
-            stream = pa.open(format = pa.get_format_from_width(aud1.getsampwidth()),
-                         channels = aud1.getnchannels(),
-                         rate = aud1.getframerate(),
-                         output = True)
-            rd_data = aud1.readframes(chunk)
-        
-            while rd_data != '':
-                stream.write(rd_data)
-                rd_data = aud1.readframes(chunk)
-        
-            stream.stop_stream()
-            stream.close()
-            pa.terminate()
+            #sd.stop()
+            array, smp_rt = sf.read(filename1, dtype = 'float32')
+            sd.play(array,smp_rt)
+            #Telling it to wait and running multiple thread will cause crash
+            #status = sd.wait()
+            #sd.stop()
         else:
             print("No filename1 audio file")
+            
+    @Slot()
+    def stop(self):
+        t2 = threading.Thread(target=self.stopt, args=(),daemon=True)
+        t2.start()
+        #t2.join()
+        
+    def stopt(self):
+        try:
+            sd.stop()
+            print("stopped")
+        except:
+            "no audio playing, or error"
+    #TODO
+    # If there is an audio clips folder save recording to that folder.
+    # It should find the last listed file in the folder use that name, and append a number to it?
+    @Slot()
+    def record(self):
+        self.ui.Play1.setEnabled(False)
+        self.ui.Stop2.setEnabled(False)
+        self.ui.Record2.setEnabled(False)
+        self.ui.Play2.setEnabled(False)
+        
+        
+        self.ui.Play1.setEnabled(True)
+        self.ui.Stop2.setEnabled(True)
+        self.ui.Record2.setEnabled(True)
+        self.ui.Play2.setEnabled(True)
+        print('done recording')
+        
+    #TODO
+    @Slot()
+    def play2(self):
+        t5 = threading.Thread(target=self.play2t, args=(),daemon=True)
+        t5.start()
     
-    def stop():
-        pass
+    def play2t(self):
+        global recording
+        print('uh')
+        print(type(recording))
+        sd.play(recording,hz)
     
-    def record():
-        pass
+    #TODO check and see what happens when stop is hit mid recording.
+    def stop2(self):
+        try:
+            sd.stop()
+            print("stopped")
+        except:
+            "no audio playing, or error"
     
-    def play2():
-        pass
-    
-    def stop2():
-        pass
-    
-    def record2():
-        pass
-    
-    def next_samp():
-        pass
-    
+    #TODO Figure out a way of defining the duration to record. Probably the amount of time of the other sample plus 2 seconds?
+    #Alternatively and better end it with the stop button. #Stop cuts the recording, but not the total file size.
+    @Slot()
+    def record2(self):
+        self.ui.Play1.setDisabled(True)
+        self.ui.Stop1.setDisabled(True)
+        self.ui.Record1.setDisabled(True)
+        self.ui.Record2.setDisabled(True)
+        self.ui.Play2.setDisabled(True)
+        t3 = threading.Thread(target=self.record2t, args=(),daemon=True)
+        t3.start()
+        
+    def record2t(self):
+        print('entered rec2')        
+        global recording        
+        global hz
+        global channelz
+        
+        duration = 3.5
+        recording = sd.rec(int(duration * hz), samplerate = hz, channels = channelz)
+        #sd.wait()
+        #This is not for thread control, but to delay the re-enable of ui
+        time.sleep(duration)
+        self.ui.Play1.setDisabled(False)
+        self.ui.Stop1.setDisabled(False)
+        self.ui.Record1.setDisabled(False)
+        self.ui.Record2.setDisabled(False)
+        self.ui.Play2.setDisabled(False)
+        print('done recording')
+        
+    #TODO
+    @Slot()
+    def next_samp(self):
+        global hz
+        global currently_write_filename
+        global save_location
+        global recording
+        global line_num
+        if type(recording) != type(0):
+            print(type(recording))
+            write(save_location +"/" + currently_write_filename, hz, recording)
+        self.line_num_update(line_num+1)
+        recording = 0
+        
+    #TODO
+    @Slot()
+    def back_samp(self):
+        global line_num
+        global currently_write_filename
+        line_num = line_num - 1
+        if line_num < 0:
+            line_num = 0
+        self.ui.lineEdit.setText(str(line_num))
+        self.ui.lineEdit_filename.setText(base_file_name+str(line_num))
+        self.update()
+        currently_write_filename = base_file_name + str(line_num)
+        
+    #TODO
     def update(self):
         
         global audio_clips
@@ -156,8 +260,8 @@ class MLaudio(QMainWindow):
         
         '''if save location is set then retrive a list of filenames from that directory'''
         '''Assign the nth filename in the audio_clips folder to filename1'''
+        #If directory is empty then use default name for recording.
         if audio_clips != "False":
-            
             try:
                 dir_list = os.listdir(audio_clips)
                 filename1 = audio_clips + "/" + dir_list[line_num]
@@ -169,10 +273,16 @@ class MLaudio(QMainWindow):
         else:
             filename1 = ""
             dir_list = ""
+            self.ui.Record1.setEnabled(True)
+            self.ui.lineEdit_filename_target.setText(user1_file_name+str(line_num)+".wav")
+            
+            
+            
+    def closeEvent(self, event):
+        print("user has clicked the red x")
+        event.accept()
     
 #Classes below are specifically to generate dialogs for changing the settings.
-
-#The classes need to accept inputs into their constructor.
 class PreferencesDialog(QDialog):
     
     def __init__(self, o_mode, obase_file_name, osave_location, otranscript_file, oaudio_clips, opline_num, ocurrent_ip, osrv_prt, oremote_ip, oremote_prt):
@@ -224,11 +334,13 @@ class PreferencesDialog(QDialog):
         self.ui.df_config_btn.accepted.connect(lambda: self.apply_pref(self.Pmode, self.Pbase_file_name, self.Psave_location, self.Ptranscript_file, self.Paudio_clips, self.Pline_num, self.Pcurrent_ip, self.Psrv_prt, self.Premote_ip, self.Premote_prt))
         
     #### When Networking is implemented update this to check connection
+    #TODO
     @Slot()
     def chk_Connect(self):
         print("CHECKING!")
         
     ##### Check that the input is a valid port number.
+    #TODO
     @Slot()
     def set_Premote_prt(self,rprt):
         self.Premote_prt = rprt
@@ -238,6 +350,7 @@ class PreferencesDialog(QDialog):
     
     ##### When the mode changes be sure to clear the settings out.
     ##### Check that it has a valid IP address
+    #TODO
     @Slot()
     def set_Premote_ip(self,rip):
         self.Premote_ip = rip
@@ -246,6 +359,7 @@ class PreferencesDialog(QDialog):
         print(self.Premote_ip)
     
     ##### Check that the input is a valid port number.
+    #TODO
     @Slot()
     def set_Psrv_prt(self,sprt):
         self.Psrv_prt = sprt
@@ -255,6 +369,7 @@ class PreferencesDialog(QDialog):
         
     ##### When the mode changes be sure to clear the settings out.
     ##### Check that it has a valid IP address
+    #TODO
     @Slot()
     def set_Pcurrent_ip(self,pip):
         self.Pcurrent_ip = pip
@@ -263,6 +378,7 @@ class PreferencesDialog(QDialog):
         print(self.Pcurrent_ip)
         
     ##### Check that n is a number / restrict it to only numbers or empty.
+    #TODO
     @Slot()
     def set_Pline_num(self,n):
         self.Pline_num = n
@@ -271,6 +387,7 @@ class PreferencesDialog(QDialog):
         print(self.Pline_num)
     
     ##### What happens if the string is an invalid path?
+    #TODO
     @Slot()
     def set_Paudio_clips(self,aud):
         self.Paudio_clips = aud
@@ -279,6 +396,7 @@ class PreferencesDialog(QDialog):
         print(self.Paudio_clips)
         
     ##### What happens if no file is selected?
+    #TODO
     @Slot()
     def set_P_transcript_file(self,tra):
         if tra == True:
@@ -291,6 +409,7 @@ class PreferencesDialog(QDialog):
         print(self.Ptranscript_file)
     
     ##### What happens if the string is an invalid path?
+    #TODO
     @Slot()
     def set_P_save_location(self,loc):
         self.Psave_location = loc
@@ -348,6 +467,7 @@ class PreferencesDialog(QDialog):
             self.ui.radioButton_5.setChecked(True)
     
     ##### Write the configuration to a file that can be loaded???
+    #TODO
     @Slot()
     def save_cur_conf(self):
         print("not implemented")
@@ -396,6 +516,11 @@ class AudioDialog(QDialog):
         self.ui.comboBox_2.currentIndexChanged.connect(lambda: self.setDChannels(self.ui.comboBox.currentIndex()))
         self.ui.comboBox_3.currentIndexChanged.connect(lambda: self.setDbits(self.ui.comboBox_3.currentIndex()))
         self.ui.pushButton.clicked.connect(lambda: self.applyAudSet(self.Dinput_src,self.Doutput_src,self.Dhz,self.Dbits,self.Dchannels))
+        self.ui.comboBox_4.currentIndexChanged.connect(lambda: self.setDev(self.ui.comboBox_4.currentText()))
+    
+    @Slot()
+    def setDev(self, d):
+        self.Dinput_src = d
     
     @Slot()
     def setDChannels(self,n):
@@ -450,15 +575,16 @@ class AudioDialog(QDialog):
         global output_src
         global hz
         global bits
-        global channels
+        global channelz
         
         input_src = self.Dinput_src
         output_src = self.Doutput_src
         hz = self.Dhz
         bits = self.Dbits
-        channels = self.Dchannels
+        channelz = self.Dchannels
 
 if __name__ == "__main__":
+    
     app = QApplication(sys.argv)
     window = MLaudio()
     window.show()

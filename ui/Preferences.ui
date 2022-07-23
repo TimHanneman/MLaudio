@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
-    <height>480</height>
+    <width>643</width>
+    <height>481</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -324,11 +324,16 @@
       <height>20</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
     <property name="toolTip">
      <string>text that will be used to name recordings</string>
     </property>
     <property name="text">
-     <string>Base Filename:</string>
+     <string>User2 Filename:</string>
     </property>
     <property name="checked">
      <bool>true</bool>
