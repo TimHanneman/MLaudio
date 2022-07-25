@@ -44,7 +44,7 @@ remote_prt = 8080
 ## Audio Settings ##
 filename1 = ""
 filename2 = ""
-input_src = 0
+input_src = len(sd.query_devices())-1
 output_src = 0 #
 hz = 44100
 bits = 32
@@ -53,6 +53,12 @@ recording = 0
 
 currently_write_filename = base_file_name + str(line_num)
 
+def current_settings():
+    global cwd, line_num,base_file_name,user1_file_name,save_location,transcript_file,audio_clips,mode,current_ip,srv_prt,remote_ip,remote_prt,filename1,filename2,input_src,output_src,hz,bits,channelz,recording
+    print("--------------------------------called------------------------------------")
+    print("cwd, line_num,base_file_name,user1_file_name,save_location,transcript_file,audio_clips,mode,current_ip,srv_prt,remote_ip,remote_prt,filename1,filename2,input_src,output_src,hz,bits,channelz,recording")
+    print(f'{cwd}, {line_num},{base_file_name},{user1_file_name},{save_location},{transcript_file},{audio_clips},{mode,current_ip},{srv_prt},{remote_ip},{remote_prt},{filename1},{filename2},{input_src},{output_src},{hz},{bits},{channelz},{recording}')
+    print("---")   
 
 def set_cwd(new_dir):
     try:
@@ -71,7 +77,7 @@ class MLaudio(QMainWindow):
         self.update()
         self.ui.actionPreferences.triggered.connect(lambda: self.preference(mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt))
         ###self.ui.Next_btn.clicked.connect(self.preference)
-        self.ui.actionAudio_Settings.triggered.connect(self.audio_set)
+        self.ui.actionAudio_Settings.triggered.connect(lambda: self.audio_set(input_src, output_src, hz, bits, channelz))
         
         self.ui.lineEdit.editingFinished.connect(lambda: self.line_num_update(self.ui.lineEdit.text()))
         self.ui.Play1.clicked.connect(lambda: self.play(filename1))
@@ -84,18 +90,17 @@ class MLaudio(QMainWindow):
         self.ui.Stop2.clicked.connect(self.stop2)
         self.ui.Play2.clicked.connect(self.play2)
         
-        
-        
-    #open the audio setting dialog
+    def current_settings():AllowNestedDocks
+
+
+    #open the audio setting dialog self, in_src, out_src, hzz, bitz, chan
     @Slot()
-    def audio_set(self):
-        aud = AudioDialog()
+    def audio_set(self, input_src, output_src, hz, bits, channelz):
+        print("channelz " + str(channelz))
+        aud = AudioDialog(input_src, output_src, hz, bits, channelz)
         aud.exec()
-        print(bits)
-        print(channelz)
-        print(hz)
-        print(input_src)
         self.update()
+        #current_settings()
 
     #open the other preference menu
     @Slot()
@@ -104,6 +109,7 @@ class MLaudio(QMainWindow):
         pref = PreferencesDialog(mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt)
         pref.exec()
         self.update()
+        #current_settings()
     
     #open the documentation?
     def Manual():
@@ -333,6 +339,8 @@ class PreferencesDialog(QDialog):
         self.ui.pushButton_2.clicked.connect(self.save_cur_conf)
         self.ui.df_config_btn.accepted.connect(lambda: self.apply_pref(self.Pmode, self.Pbase_file_name, self.Psave_location, self.Ptranscript_file, self.Paudio_clips, self.Pline_num, self.Pcurrent_ip, self.Psrv_prt, self.Premote_ip, self.Premote_prt))
         
+        #current_settings()
+        
     #### When Networking is implemented update this to check connection
     #TODO
     @Slot()
@@ -500,23 +508,63 @@ class PreferencesDialog(QDialog):
 
 class AudioDialog(QDialog):
     'Each Audio setting only set after clicking the okay button.'
-    Dinput_src = 0
-    Doutput_src = 0
-    Dhz = 44100
-    Dbits = 32
-    Dchannels = 1
+
     
-    def __init__(self):
+    def __init__(self, in_src, out_src, hzz, bitz, chan):
         super().__init__()
+        
+        self.Dinput_src = in_src
+        self.Doutput_src = out_src
+        self.Dhz = hzz
+        self.Dbits = bitz
+        self.Dchannels = chan
+        
         self.ui = Ui_Dialog_Aud()
         self.ui.setupUi(self)
         
+        #Channels, Bit Depth, Hz, Device
+        self.ui.comboBox_2.setCurrentIndex(self.Dchannels-1)
+        #Formula converts between bits and index
+        self.ui.comboBox_3.setCurrentIndex(self.Dbits/8-2)
+        self.set_hz_cur_idx(self.Dhz)
+        self.ui.comboBox_4.setCurrentIndex(self.Dinput_src)
+        #current_settings()
+        
         #Send a function reference to the slot to pass both the signal and additional parameters
         self.ui.comboBox.currentIndexChanged.connect(lambda: self.setDhz(self.ui.comboBox.currentIndex()))
-        self.ui.comboBox_2.currentIndexChanged.connect(lambda: self.setDChannels(self.ui.comboBox.currentIndex()))
+        self.ui.comboBox_2.currentIndexChanged.connect(lambda: self.setDChannels(self.ui.comboBox_2.currentIndex()))
         self.ui.comboBox_3.currentIndexChanged.connect(lambda: self.setDbits(self.ui.comboBox_3.currentIndex()))
         self.ui.pushButton.clicked.connect(lambda: self.applyAudSet(self.Dinput_src,self.Doutput_src,self.Dhz,self.Dbits,self.Dchannels))
-        self.ui.comboBox_4.currentIndexChanged.connect(lambda: self.setDev(self.ui.comboBox_4.currentText()))
+        #self.ui.comboBox_4.currentIndexChanged.connect(lambda: self.setDev(self.ui.comboBox_4.currentText()))
+        self.ui.comboBox_4.currentIndexChanged.connect(lambda: self.setDev(self.ui.comboBox_4.currentIndex()))
+
+    def set_hz_cur_idx(self, Dhz):
+        if Dhz == 8000:
+            self.ui.comboBox.setCurrentIndex(0)
+        elif Dhz ==11025:
+            self.ui.comboBox.setCurrentIndex(1)
+        elif Dhz ==16000:
+            self.ui.comboBox.setCurrentIndex(2)
+        elif Dhz ==22050:
+            self.ui.comboBox.setCurrentIndex(3)
+        elif Dhz ==32000:
+            self.ui.comboBox.setCurrentIndex(4)
+        elif Dhz ==44100:
+            self.ui.comboBox.setCurrentIndex(5)
+        elif Dhz ==48000:
+            self.ui.comboBox.setCurrentIndex(6)
+        elif Dhz ==88200:
+            self.ui.comboBox.setCurrentIndex(7)
+        elif Dhz ==96000:
+            self.ui.comboBox.setCurrentIndex(8)
+        elif Dhz ==176400:
+            self.ui.comboBox.setCurrentIndex(9)
+        elif Dhz ==192000:
+            self.ui.comboBox.setCurrentIndex(10)
+        elif Dhz ==352800:
+            self.ui.comboBox.setCurrentIndex(11)
+        elif Dhz ==384000:
+            self.ui.comboBox.setCurrentIndex(12)
     
     @Slot()
     def setDev(self, d):
@@ -524,11 +572,13 @@ class AudioDialog(QDialog):
     
     @Slot()
     def setDChannels(self,n):
-        #Index is n, but channels are what needs to be assigned
+        #Indexes are different than num of channels
         if n == 0:
             self.Dchannels = 1
+
         else:
             self.Dchannels = 2
+
     
     @Slot()
     def setDbits(self,n):
@@ -536,7 +586,7 @@ class AudioDialog(QDialog):
             self.Dbits = 16
         elif n == 1:
             self.Dbits = 24
-        else :
+        else:
             self.Dbits = 32
 
     @Slot()
