@@ -41,12 +41,18 @@
      <rect>
       <x>400</x>
       <y>280</y>
-      <width>201</width>
+      <width>151</width>
       <height>22</height>
      </rect>
     </property>
     <property name="toolTip">
-     <string/>
+     <string>The last character_number cannot be changed.</string>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
    <widget class="QLabel" name="label_3">
@@ -363,6 +369,22 @@
     </property>
     <property name="text">
      <string>Waiting</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_filename_end">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>280</y>
+      <width>51</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>The last character_number cannot be changed.</string>
     </property>
    </widget>
   </widget>
