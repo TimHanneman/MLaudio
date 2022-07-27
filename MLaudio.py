@@ -244,6 +244,8 @@ class MLaudio(QMainWindow):
         self.ui.Record1.setDisabled(True)
         self.ui.Record2.setDisabled(True)
         self.ui.Play2.setDisabled(True)
+        self.ui.Next_btn.setDisabled(True)
+        self.ui.Next_btn.setText("View")
         t3 = threading.Thread(target=self.record2t, args=(),daemon=True)
         t3.start()
         
@@ -255,14 +257,17 @@ class MLaudio(QMainWindow):
         
         duration = 3.5
         recording = sd.rec(int(duration * hz), samplerate = hz, channels = channelz)
+
         #sd.wait()
         #This is not for thread control, but to delay the re-enable of ui
         time.sleep(duration)
+        
         self.ui.Play1.setDisabled(False)
         self.ui.Stop1.setDisabled(False)
         self.ui.Record1.setDisabled(False)
         self.ui.Record2.setDisabled(False)
         self.ui.Play2.setDisabled(False)
+        self.ui.Next_btn.setDisabled(False)
         print('done recording')
         
     @Slot()
@@ -284,17 +289,30 @@ class MLaudio(QMainWindow):
     #TODO
     @Slot()
     def next_samp(self):
-        print("next_samp")
         global hz
         global currently_write_filename
         global save_location
         global recording
         global line_num
-        if type(recording) != type(0):
-            print(type(recording))
-            write(save_location +"/" + currently_write_filename+".wav", hz, recording)
-        self.line_num_update(line_num+1)
-        recording = 0
+        
+        if self.ui.Next_btn.text() == 'View':
+            time_amt = np.arange(0,len(recording)/hz,1/hz)
+            plt.figure(figsize=(7.5,1))
+            plt.axis('off')
+            plt.plot(time_amt,recording)
+            plt.savefig('temp2.png', bbox_inches='tight', pad_inches=0)
+            
+            self.ui.scene2 = QGraphicsScene()
+            self.ui.scene2.addPixmap(QPixmap('temp2.png'))
+            self.ui.WAV_Graph2.setScene(self.ui.scene2)
+            self.ui.Next_btn.setText('Next')
+        else:
+            print("next_samp")
+            if type(recording) != type(0):
+                print(type(recording))
+                write(save_location +"/" + currently_write_filename+".wav", hz, recording)
+                self.line_num_update(line_num+1)
+                recording = 0
         
     #TODO
     @Slot()
