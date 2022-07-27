@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QDialog, QFileDialog, 
                                QLabel, QComboBox, QVBoxLayout, QGraphicsView, QGraphicsScene)
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Signal, Qt, Slot
-from ui_MLaudio import Ui_MainWindow
+from ui_MLaudio import Ui_MLaudio
 from ui_Preference import Ui_Dialog
 from ui_AudioSettings import Ui_Dialog_Aud
 
@@ -76,7 +76,7 @@ class MLaudio(QMainWindow):
     
     def __init__(self):
         super().__init__()
-        self.ui = Ui_MainWindow()
+        self.ui = Ui_MLaudio()
         
         self.ui.setupUi(self)
         self.update()
