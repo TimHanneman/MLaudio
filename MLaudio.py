@@ -460,7 +460,7 @@ class PreferencesDialog(QDialog):
         
         self.ui.checkBox_filena.stateChanged.connect(lambda: self.set_Pbase_file_name(self.ui.checkBox_filena.isChecked()))
         self.ui.txt_filena.editingFinished.connect(lambda: self.set_cus_Pbase_file_name(self.ui.txt_filena.text()))
-        #self.ui.txt_SavLoc.editingFinished.connect(lambda: self.set_P_save_location(self.ui.txt_SavLoc.text()))
+        self.ui.txt_SavLoc.editingFinished.connect(lambda: self.set_P_save_location(self.ui.txt_SavLoc.text()))
         #self.ui.txt_SavLoc.textChanged.connect(self.set_P_save_location())
         
         self.ui.checkBox_trns.stateChanged.connect(lambda: self.set_P_transcript_file(self.ui.checkBox_trns.isChecked()))
