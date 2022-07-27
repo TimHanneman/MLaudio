@@ -7,7 +7,8 @@ Not gonna lie this code is a mess, but it gets the job done.
 """
 import sys
 from PySide6.QtWidgets import (QApplication, QMainWindow, QDialog, QFileDialog, QWidget,
-                               QLabel, QComboBox, QVBoxLayout)
+                               QLabel, QComboBox, QVBoxLayout, QGraphicsView, QGraphicsScene)
+from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Signal, Qt, Slot
 from ui_MLaudio import Ui_MainWindow
 from ui_Preference import Ui_Dialog
@@ -21,6 +22,9 @@ import sounddevice as sd
 import soundfile as sf
 from scipy.io.wavfile import write
 
+import numpy as np
+import matplotlib.pyplot as plt
+
 #Settings Variables#
 ## Preferences ##
 #TODO If I was smart before coding all of this I would have made a settings class
@@ -33,6 +37,7 @@ base_file_name = "audio"
 user1_file_name = "usr1_aud"
 save_location = cwd
 transcript_file = ["False","False"]
+transcript_lines = ""
 audio_clips = "False"
 mode = "Local" #Local, Server, Display
     #Network Settings#
@@ -85,11 +90,18 @@ class MLaudio(QMainWindow):
         self.ui.Stop1.clicked.connect(self.stop)
         self.ui.lineEdit_filename_target.setEnabled(False)
         self.ui.lineEdit_filename.editingFinished.connect(lambda: self.up_file_name(self.ui.lineEdit_filename.text()))
+        #self.ui.Transcript_brw.sourceChanged.connect(self.view_trns)
+        
         self.ui.Record2.clicked.connect(self.record2)
         self.ui.Next_btn.clicked.connect(self.next_samp)
         self.ui.pushButton.clicked.connect(self.back_samp)
         self.ui.Stop2.clicked.connect(self.stop2)
         self.ui.Play2.clicked.connect(self.play2)
+        
+        self.smp_hz1 = 0
+        self.smp_hz2 = 0
+        self.arr1 = 0
+        self.arr2 = 0
 
     #open the audio setting dialog self, in_src, out_src, hzz, bitz, chan
     @Slot()
@@ -127,6 +139,27 @@ class MLaudio(QMainWindow):
         self.ui.lineEdit_filename.setText(base_file_name)
         self.ui.lineEdit_filename_end.setText(str(line_num)+".wav")
         self.update()
+
+    def load_aud_file(self):
+        print('load_aud_file')
+        self.arr1, self.smp_hz1 = sf.read(filename1, dtype = 'float32')
+        #self.arr2, self.smp_hz2 = sf.read(filename2, dtype = 'float32')
+        
+        duration = len(self.arr1)/self.smp_hz1
+        time = np.arange(0,duration,1/self.smp_hz1)
+        
+        plt.figure(figsize=(7.5,1))
+        plt.axis('off')
+        plt.plot(time,self.arr1)
+        plt.savefig('temp1.png', bbox_inches='tight', pad_inches=0)
+        
+        print('set pixmap')
+        self.ui.scene = QGraphicsScene()
+        #pixmap = QPixmap('temp1.png')
+        self.ui.scene.addPixmap(QPixmap('temp1.png'))
+        self.ui.Wav_Graph1.setScene(self.ui.scene)
+        #self.ui.Wav_Graph1.setPixmap(pixmap)
+        
     
     #TODO It seems like I should allow the play button to be clicked only once and stop button clicked only once.
     #       I'm guessing that the audio package is not thread safe. One way I could implement this is by having only 1 button. if playing then it stops the audio.
@@ -142,8 +175,8 @@ class MLaudio(QMainWindow):
         #TODO probably need to detect dtype
         if filename1 != "":
             #sd.stop()
-            array, smp_rt = sf.read(filename1, dtype = 'float32')
-            sd.play(array,smp_rt)
+            #array, smp_rt = sf.read(filename1, dtype = 'float32')
+            sd.play(self.arr1,self.smp_hz1)
             #Telling it to wait and running multiple thread will cause crash
             #status = sd.wait()
             #sd.stop()
@@ -238,6 +271,16 @@ class MLaudio(QMainWindow):
         base_file_name = na
         self.update()
         
+    def view_trns(self):
+        print("view Transcript")
+        self.ui.Transcript_brw.clear()
+        print(line_num)
+        print(type(transcript_lines))
+        if line_num < len(transcript_lines) and type(transcript_lines) == type([]):
+            print("did it make it?")
+            self.ui.Transcript_brw.append(transcript_lines[line_num])
+            print(transcript_lines[line_num])
+        
     #TODO
     @Slot()
     def next_samp(self):
@@ -291,6 +334,7 @@ class MLaudio(QMainWindow):
                 filename1 = audio_clips + "/" + dir_list[line_num]
                 self.ui.lineEdit_filename_target.setText(filename1)
                 print(filename1)
+                self.load_aud_file()
             except:
                 print("setting filename1 failed")
                 filename1 = ""
@@ -301,6 +345,8 @@ class MLaudio(QMainWindow):
             #Disabling this feature, can be implemented later
             #self.ui.Record1.setEnabled(True)
             self.ui.lineEdit_filename_target.setText(user1_file_name+str(line_num)+".wav")
+        
+        self.view_trns()
             
             
             
@@ -360,7 +406,8 @@ class PreferencesDialog(QDialog):
         
         self.ui.checkBox_filena.stateChanged.connect(lambda: self.set_Pbase_file_name(self.ui.checkBox_filena.isChecked()))
         self.ui.txt_filena.editingFinished.connect(lambda: self.set_cus_Pbase_file_name(self.ui.txt_filena.text()))
-        self.ui.txt_SavLoc.editingFinished.connect(lambda: self.set_P_save_location(self.ui.txt_SavLoc.text()))
+        #self.ui.txt_SavLoc.editingFinished.connect(lambda: self.set_P_save_location(self.ui.txt_SavLoc.text()))
+        #self.ui.txt_SavLoc.textChanged.connect(self.set_P_save_location())
         
         self.ui.checkBox_trns.stateChanged.connect(lambda: self.set_P_transcript_file(self.ui.checkBox_trns.isChecked()))
         self.ui.txt_AudClip.editingFinished.connect(lambda: self.set_Paudio_clips(self.ui.txt_AudClip.text()))
@@ -447,28 +494,41 @@ class PreferencesDialog(QDialog):
     #TODO
     @Slot()
     def set_P_transcript_file(self,tra):
+        
         print("set_P_transcript_file")
         if tra == True:
             w = QWidget()
             w.resize(320,240)
             w.setWindowTitle("Select Transcript File")
             self.Ptranscript_file = QFileDialog.getOpenFileName(w, 'Open File', '/')
-            #self.ui.txt_trns.setText(self.Ptranscript_file)            
+            self.ui.txt_trns.setText(self.Ptranscript_file[0])
+            #If the file has changed set the transcript line to empty
+            #open new file
+            #Read all the lines from the transcript file.
             print(self.Ptranscript_file)
         else:
-            self.Ptranscript_file = ""
-            self.ui.txt_trns.setText(self.Ptranscript_file)
+            self.Ptranscript_file = ["False","False"]
+            self.ui.txt_trns.setText(self.Ptranscript_file[0])
         print(self.Ptranscript_file)
     
     ##### What happens if the string is an invalid path?
     #TODO
     @Slot()
-    def set_P_save_location(self,loc):
+    def set_P_save_location(self, loc):
+
         print("set_P_save_location")
         self.Psave_location = loc
+        
         if loc == "":
             self.Psave_location = "/"
         print(self.Psave_location)
+        
+        '''w = QWidget()
+        w.resize(320,240)
+        w.setWindowTitle("Select Save folder location")
+        self.Psave_location = QFileDialog.getExistingDirectory(w, 'Open Directory', cwd,)
+        self.ui.txt_SavLoc.setText(self.Psave_location)
+        print(self.Psave_location)'''
         
     def set_Pbase_file_name(self, na):
         print("set_Pbase_file_name")
@@ -534,6 +594,7 @@ class PreferencesDialog(QDialog):
         global base_file_name
         global save_location
         global transcript_file
+        global transcript_lines
         global audio_clips
         global line_num
         global current_ip
@@ -554,6 +615,16 @@ class PreferencesDialog(QDialog):
         remote_prt = self.Premote_prt
         mode = self.Pmode
         currently_write_filename = base_file_name + str(line_num)
+        
+        if transcript_file[0] != 'False':
+            #Check and see if transcript file has changed
+            #If the file has changed set the transcript line to empty
+            transcript_lines = []
+            
+            #open new file
+            with open(transcript_file[0], 'r') as f:
+                transcript_lines = f.readlines()
+                f.close()
 
 
 class AudioDialog(QDialog):
