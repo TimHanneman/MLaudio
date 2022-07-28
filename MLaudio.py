@@ -81,7 +81,7 @@ class MLaudio(QMainWindow):
         
         self.ui.setupUi(self)
         self.update()
-        self.ui.actionPreferences.triggered.connect(lambda: self.preference(mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt))
+        self.ui.actionPreferences.triggered.connect(lambda: self.preference(mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt, sort_type))
         ###self.ui.Next_btn.clicked.connect(self.preference)
         self.ui.actionAudio_Settings.triggered.connect(lambda: self.audio_set(input_src, output_src, hz, bits, channelz))
         
@@ -116,9 +116,9 @@ class MLaudio(QMainWindow):
 
     #open the other preference menu
     @Slot()
-    def preference(self,mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt):
+    def preference(self,mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt, sort_type):
         #print("Display preferences dialog")
-        pref = PreferencesDialog(mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt)
+        pref = PreferencesDialog(mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt, sort_type)
         pref.exec()
         self.update()
         #current_settings()
@@ -360,7 +360,7 @@ class MLaudio(QMainWindow):
                 #Do the files need to be sorted by any particular order?
                 #Sort by nums at begining,end of the filename, or default system sort.
                 
-                option = "begining"
+                option = sort_type
                 
                 for filena in dir_list:
                     print("cur filena:" + filena)
@@ -398,6 +398,7 @@ class MLaudio(QMainWindow):
                 self.ui.lineEdit_filename_target.setText(filename1)
                 print(filename1)
                 self.load_aud_file()
+                
             except:
                 print("setting filename1 failed")
                 filename1 = ""
@@ -417,11 +418,12 @@ class MLaudio(QMainWindow):
 #Classes below are specifically to generate dialogs for changing the settings.
 class PreferencesDialog(QDialog):
     
-    def __init__(self, o_mode, obase_file_name, osave_location, otranscript_file, oaudio_clips, opline_num, ocurrent_ip, osrv_prt, oremote_ip, oremote_prt):
+    def __init__(self, o_mode, obase_file_name, osave_location, otranscript_file, oaudio_clips, opline_num, ocurrent_ip, osrv_prt, oremote_ip, oremote_prt, osort_type):
         super().__init__()
         
         #Variable Init
         self.Pmode = o_mode
+        self.Psort_type = osort_type
 
         self.Pbase_file_name = obase_file_name
         self.Psave_location = osave_location
@@ -445,6 +447,7 @@ class PreferencesDialog(QDialog):
         #self.ui.Record1.setDisabled(True)
         
         self.cur_Pmode(self.Pmode)
+        self.cur_sort_pref(self.Psort_type)
         #self.ui.checkBox_filena.
         self.ui.txt_filena.setText(self.Pbase_file_name)
         self.ui.txt_SavLoc.setText(self.Psave_location)
@@ -481,6 +484,15 @@ class PreferencesDialog(QDialog):
         self.ui.connect_btn.clicked.connect(self.chk_Connect)
         self.ui.pushButton_2.clicked.connect(self.save_cur_conf)
         self.ui.df_config_btn.accepted.connect(lambda: self.apply_pref(self.Pmode, self.Pbase_file_name, self.Psave_location, self.Ptranscript_file, self.Paudio_clips, self.Pline_num, self.Pcurrent_ip, self.Psrv_prt, self.Premote_ip, self.Premote_prt))
+        
+        self.ui.radioButton.toggled.connect(lambda: self.sort_pref('default'))
+        self.ui.radioButton_2.toggled.connect(lambda: self.sort_pref('begining'))
+        self.ui.radioButton_6.toggled.connect(lambda: self.sort_pref('end'))
+        
+    @Slot()
+    def sort_pref(self,choice):
+        self.Psort_type = choice
+        sort_type = choice
         
     #### When Networking is implemented update this to check connection
     #TODO
@@ -642,6 +654,14 @@ class PreferencesDialog(QDialog):
             self.ui.radioButton_4.setChecked(True)
         elif m == "Display":
             self.ui.radioButton_5.setChecked(True)
+            
+    def cur_sort_pref(self,choice):
+        if choice == "default":
+            self.ui.radioButton.setChecked(True)
+        elif choice == 'begining':
+            self.ui.radioButton_2.setChecked(True)
+        else:
+            self.ui.radioButton_6.setChecked(True)
     
     ##### Write the configuration to a file that can be loaded???
     #TODO
@@ -664,6 +684,7 @@ class PreferencesDialog(QDialog):
         global remote_prt
         global mode
         global currently_write_filename
+        global sort_type
         
         base_file_name = self.Pbase_file_name
         save_location = self.Psave_location
@@ -676,6 +697,7 @@ class PreferencesDialog(QDialog):
         remote_prt = self.Premote_prt
         mode = self.Pmode
         currently_write_filename = base_file_name + str(line_num)
+        sort_type = self.Psort_type
         
         if transcript_file[0] != 'False':
             #Check and see if transcript file has changed

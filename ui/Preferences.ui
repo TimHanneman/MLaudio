@@ -260,8 +260,8 @@
    <widget class="QLineEdit" name="txt_linNum">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>160</y>
+      <x>210</x>
+      <y>140</y>
       <width>41</width>
       <height>22</height>
      </rect>
@@ -270,8 +270,8 @@
    <widget class="QLabel" name="label_11">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>160</y>
+      <x>120</x>
+      <y>140</y>
       <width>81</width>
       <height>16</height>
      </rect>
@@ -431,6 +431,61 @@
     <property name="text">
      <string>Audio Clips:</string>
     </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>170</y>
+      <width>121</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Audio Clip Sort Type</string>
+    </property>
+    <widget class="QRadioButton" name="radioButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>99</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>System Sort</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButton_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>99</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Start of Name</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButton_6">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>99</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>End of Name</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QPushButton" name="pushButton_2">
@@ -753,8 +808,8 @@
      <y>405</y>
     </hint>
     <hint type="destinationlabel">
-     <x>417</x>
-     <y>207</y>
+     <x>397</x>
+     <y>187</y>
     </hint>
    </hints>
   </connection>
@@ -851,6 +906,54 @@
     <hint type="destinationlabel">
      <x>302</x>
      <y>273</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_5</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>radioButton</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>46</x>
+     <y>379</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>241</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_5</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>radioButton_2</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>48</x>
+     <y>365</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>360</x>
+     <y>258</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_5</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>radioButton_6</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>31</x>
+     <y>385</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>360</x>
+     <y>276</y>
     </hint>
    </hints>
   </connection>
