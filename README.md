@@ -13,11 +13,17 @@ time is set to be equal to the target audio + 0.5 seconds. Save happens after ea
 
 #Installation/Dependencies
 The project requires several python packages.
+
 pip install PySide6
+
 pip install sounddevice
+
 pip install soundfile
+
 pip install scipy
+
 pip install matplotlib
+
 
 #TODO
 The project is in a usable state but has some unimplemented features & improvements that could be made.
