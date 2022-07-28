@@ -7,7 +7,7 @@ MLaudio is a tool that can be used for recording audio to match another set of a
 When no audio clips folder is set you can record 3.5 second wav files. If there is a matching audio clips folder then record
 time is set to be equal to the target audio + 0.5 seconds. Save happens after each next.
 
-#How to Use
+# How to Use
 1) Copy this github project into a folder
 2) Run the project: python MLaudio.py
 
@@ -25,7 +25,7 @@ pip install scipy
 pip install matplotlib
 
 
-#TODO
+# TODO
 The project is in a usable state but has some unimplemented features & improvements that could be made.
 Since these things are not a high priority for me to use this software it will likely be some time before I implement them.
 1) Display mode over network.
