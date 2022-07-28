@@ -31,6 +31,7 @@ import matplotlib.pyplot as plt
 #and just have used a single object for this.
 
 cwd = os.getcwd()
+sort_type = "end"
 
 line_num = 1
 base_file_name = "audio"
@@ -348,6 +349,7 @@ class MLaudio(QMainWindow):
         global audio_clips
         global filename1
         global currently_write_filename
+        global sort_type
         
         #If directory is empty then use default name for recording.
         if audio_clips != "False":
@@ -356,12 +358,8 @@ class MLaudio(QMainWindow):
                 dir_list_sorted = [None]*(len(dir_list)+1)
                 print(len(dir_list_sorted))
                 #Do the files need to be sorted by any particular order?
-                #Select wheter to default sort, begining numbers or end numbers of the filename
-                #if default dir_list.sort()
-                #elif beginning then check each character of the filename one by one until a non-numeric value
-                #     is found. slice the numbers out, place the file in that position in a list. Indexes should
-                #     not exceed 1 past the length of the list.
-                #elif ending iterate backward through filename one by one, repeat above logic.
+                #Sort by nums at begining,end of the filename, or default system sort.
+                
                 option = "begining"
                 
                 for filena in dir_list:
@@ -381,12 +379,20 @@ class MLaudio(QMainWindow):
                             elif char.isnumeric() == False:
                                 print("ended at: " + str(x))
                                 break
+                        #Check assumption that it starts with numbers
                         if x > 0:
                             dir_list_sorted[int(filena[0:x])-1]=filena
+                            
                     else:
-                        pass
-                print('breked?')
-                #Check if the file type is wav, if it isn't, go to the next
+                        if filena[-4:len(filena)] == '.wav' and filena[-5:-4].isnumeric():
+                            x = -4
+                            for c in reversed(filena[0:-4]):
+                                if c.isnumeric() == True:
+                                    x -= 1
+                                elif c.isnumeric() == False:
+                                    break
+                            dir_list_sorted[int(filena[x:-4])-1] = filena
+                        
                 
                 filename1 = audio_clips + "/" + dir_list_sorted[line_num-1]
                 self.ui.lineEdit_filename_target.setText(filename1)
