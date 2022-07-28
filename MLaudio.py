@@ -17,7 +17,6 @@ from ui_AudioSettings import Ui_Dialog_Aud
 import sys, os, atexit, time
 import threading
 
-
 import sounddevice as sd
 import soundfile as sf
 from scipy.io.wavfile import write
@@ -107,21 +106,16 @@ class MLaudio(QMainWindow):
     #open the audio setting dialog self, in_src, out_src, hzz, bitz, chan
     @Slot()
     def audio_set(self, input_src, output_src, hz, bits, channelz):
-        #print("audio_set")
-        #print("channelz " + str(channelz))
         aud = AudioDialog(input_src, output_src, hz, bits, channelz)
         aud.exec()
         self.update()
-        #current_settings()
 
     #open the other preference menu
     @Slot()
     def preference(self,mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt, sort_type):
-        #print("Display preferences dialog")
         pref = PreferencesDialog(mode, base_file_name, save_location, transcript_file, audio_clips, line_num, current_ip, srv_prt, remote_ip, remote_prt, sort_type)
         pref.exec()
         self.update()
-        #current_settings()
     
     #open the documentation?
     def Manual():
@@ -130,7 +124,6 @@ class MLaudio(QMainWindow):
     
     #If the transcript is set, and the line number is changed
     def line_num_update(self, nn):
-        print("line_num_update")
         global line_num
         global currently_write_filename
         line_num = int(nn)
@@ -142,9 +135,7 @@ class MLaudio(QMainWindow):
         self.update()
 
     def load_aud_file(self):
-        #print('load_aud_file')
         self.arr1, self.smp_hz1 = sf.read(filename1, dtype = 'float32')
-        #self.arr2, self.smp_hz2 = sf.read(filename2, dtype = 'float32')
         
         duration = len(self.arr1)/self.smp_hz1
         time = np.arange(0,duration,1/self.smp_hz1)
@@ -156,10 +147,9 @@ class MLaudio(QMainWindow):
         
         print('set pixmap')
         self.ui.scene = QGraphicsScene()
-        #pixmap = QPixmap('temp1.png')
         self.ui.scene.addPixmap(QPixmap('temp1.png'))
         self.ui.Wav_Graph1.setScene(self.ui.scene)
-        #self.ui.Wav_Graph1.setPixmap(pixmap)
+
         
     
     #TODO It seems like I should allow the play button to be clicked only once and stop button clicked only once.
@@ -168,19 +158,14 @@ class MLaudio(QMainWindow):
     def play(self, filename):
         t1 = threading.Thread(target=self.playt, args=(filename,),daemon=True)
         t1.start()
-        #print("thread end?")
 
             
     def playt(self, filename):
-        #print("playt")
         #TODO probably need to detect dtype
         if filename1 != "":
-            #sd.stop()
-            #array, smp_rt = sf.read(filename1, dtype = 'float32')
             sd.play(self.arr1,self.smp_hz1)
             #Telling it to wait and running multiple thread will cause crash
             #status = sd.wait()
-            #sd.stop()
         else:
             print("No filename1 audio file")
             
@@ -191,10 +176,8 @@ class MLaudio(QMainWindow):
         #t2.join()
         
     def stopt(self):
-        #print("stopt")
         try:
             sd.stop()
-            #print("stopped")
         except:
             print("no audio playing, or error")
     #TODO
@@ -202,18 +185,16 @@ class MLaudio(QMainWindow):
     # It should find the last listed file in the folder use that name, and append a number to it?
     @Slot()
     def record(self):
-        #print("record")
+
         self.ui.Play1.setEnabled(False)
         self.ui.Stop2.setEnabled(False)
         self.ui.Record2.setEnabled(False)
         self.ui.Play2.setEnabled(False)
         
-        
         self.ui.Play1.setEnabled(True)
         self.ui.Stop2.setEnabled(True)
         self.ui.Record2.setEnabled(True)
         self.ui.Play2.setEnabled(True)
-        #print('done recording')
         
     #TODO
     @Slot()
@@ -223,16 +204,12 @@ class MLaudio(QMainWindow):
     
     def play2t(self):
         global recording
-        #print('uh play2t')
-        #print(type(recording))
         sd.play(recording,hz)
     
     #TODO check and see what happens when stop is hit mid recording.
     def stop2(self):
-        #print("stop2")
         try:
             sd.stop()
-            #print("stopped")
         except:
             print("no audio playing, or error")
     
@@ -250,16 +227,17 @@ class MLaudio(QMainWindow):
         t3 = threading.Thread(target=self.record2t, args=(),daemon=True)
         t3.start()
         
-    def record2t(self):
-        #print('entered rec2')        
+    def record2t(self):     
         global recording        
         global hz
         global channelz
         
-        duration = 3.5
+        if filename1 != "" and type(self.arr1) == type(np.array([])):
+            duration = (len(self.arr1)/self.smp_hz1)+0.5
+        else:
+            duration = 3.5
         recording = sd.rec(int(duration * hz), samplerate = hz, channels = channelz)
 
-        #sd.wait()
         #This is not for thread control, but to delay the re-enable of ui
         time.sleep(duration)
         
@@ -269,7 +247,6 @@ class MLaudio(QMainWindow):
         self.ui.Record2.setDisabled(False)
         self.ui.Play2.setDisabled(False)
         self.ui.Next_btn.setDisabled(False)
-        #print('done recording')
         
     @Slot()
     def up_file_name(self, na):
@@ -278,10 +255,7 @@ class MLaudio(QMainWindow):
         self.update()
         
     def view_trns(self):
-        #print("view Transcript")
         self.ui.Transcript_brw.clear()
-        #print(line_num)
-        #print(type(transcript_lines))
         if line_num < len(transcript_lines) and type(transcript_lines) == type([]):
             self.ui.Transcript_brw.append(transcript_lines[line_num-1])
         
@@ -306,7 +280,6 @@ class MLaudio(QMainWindow):
             self.ui.WAV_Graph2.setScene(self.ui.scene2)
             self.ui.Next_btn.setText('Next')
         else:
-            #print("next_samp")
             if type(recording) != type(0):
                 write(save_location +"/" + currently_write_filename+".wav", hz, recording)
             self.line_num_update(line_num+1)
@@ -316,7 +289,6 @@ class MLaudio(QMainWindow):
     #TODO
     @Slot()
     def back_samp(self):
-        #print("back_samp")
         global line_num
         global currently_write_filename
         line_num = line_num - 1
@@ -330,7 +302,6 @@ class MLaudio(QMainWindow):
         
     #TODO
     def update(self):
-        #print("update")
         global currently_write_filename
 
         self.ui.lineEdit_filename.setText(base_file_name)
@@ -356,28 +327,21 @@ class MLaudio(QMainWindow):
             try:
                 dir_list = os.listdir(audio_clips)
                 dir_list_sorted = [None]*(len(dir_list)+1)
-                print(len(dir_list_sorted))
                 #Do the files need to be sorted by any particular order?
                 #Sort by nums at begining,end of the filename, or default system sort.
                 
                 option = sort_type
                 
                 for filena in dir_list:
-                    print("cur filena:" + filena)
                     if option == 'default':
                         dir_list.sort()
                         break
                     elif option == 'begining':
                         x=0
                         for char in filena:
-                            print("current ch:"+char)
-                            print(char.isnumeric())
-                            print(x)
                             if char.isnumeric() == True:
-                                print("number")
                                 x+=1
                             elif char.isnumeric() == False:
-                                print("ended at: " + str(x))
                                 break
                         #Check assumption that it starts with numbers
                         if x > 0:
@@ -504,84 +468,67 @@ class PreferencesDialog(QDialog):
     #TODO
     @Slot()
     def set_Premote_prt(self,rprt):
-        #print("set_Premote_prt")
         self.Premote_prt = rprt
         if rprt == "":
             self.Premote_prt == 8080
-        #print(self.Premote_prt)
     
     ##### When the mode changes be sure to clear the settings out.
     ##### Check that it has a valid IP address
     #TODO
     @Slot()
     def set_Premote_ip(self,rip):
-        #print("set_Premote_ip")
         self.Premote_ip = rip
         if rip == "":
             self.Premote_ip = "127.0.0.1"
-        #print(self.Premote_ip)
     
     ##### Check that the input is a valid port number.
     #TODO
     @Slot()
     def set_Psrv_prt(self,sprt):
-        #print("set_Psrv_prt")
         self.Psrv_prt = sprt
         if sprt == "":
             self.Psrv_prt = 8080
-        #print(self.Psrv_prt)
         
     ##### When the mode changes be sure to clear the settings out.
     ##### Check that it has a valid IP address
     #TODO
     @Slot()
     def set_Pcurrent_ip(self,pip):
-        #print("set_Pcurrent_ip")
         self.Pcurrent_ip = pip
         if pip == "":
             self.Pcurrent_ip = "127.0.0.1"
-        #print(self.Pcurrent_ip)
         
     ##### Check that n is a number / restrict it to only numbers or empty.
     #TODO
     @Slot()
     def set_Pline_num(self,n):
-        #print("set_Pline_num")
         self.Pline_num = n
         if n == "":
             self.Pline_num = 0
-        #print(self.Pline_num)
     
     ##### What happens if the string is an invalid path?
     #TODO
     @Slot()
     def set_Paudio_clips(self,aud):
-        #print("set_Paudio_clips")
         self.Paudio_clips = aud
         if aud == "":
             self.Paudio_clips = "False"
-        #print(self.Paudio_clips)
         
     ##### What happens if no file is selected?
     #TODO
     @Slot()
     def set_P_transcript_file(self,tra):
         
-        #print("set_P_transcript_file")
         if tra == True:
             w = QWidget()
             w.resize(320,240)
             w.setWindowTitle("Select Transcript File")
             self.Ptranscript_file = QFileDialog.getOpenFileName(w, 'Open File', '/')
             self.ui.txt_trns.setText(self.Ptranscript_file[0])
-            #If the file has changed set the transcript line to empty
-            #open new file
-            #Read all the lines from the transcript file.
-            #print(self.Ptranscript_file)
+
         else:
             self.Ptranscript_file = ["False","False"]
             self.ui.txt_trns.setText(self.Ptranscript_file[0])
-        #print(self.Ptranscript_file)
     
     ##### What happens if the string is an invalid path?
     #TODO
@@ -589,12 +536,10 @@ class PreferencesDialog(QDialog):
     def set_P_save_location(self, loc):
         global cwd
 
-        #print("set_P_save_location")
         self.Psave_location = loc
         
         if loc == "":
             self.Psave_location = cwd
-        #print(self.Psave_location)
         
         '''w = QWidget()
         w.resize(320,240)
@@ -604,7 +549,6 @@ class PreferencesDialog(QDialog):
         print(self.Psave_location)'''
         
     def set_Pbase_file_name(self, na):
-        #print("set_Pbase_file_name")
         if na == True:
             self.Pbase_file_name = ""
             self.ui.txt_filena.setText(self.Pbase_file_name)
@@ -612,17 +556,14 @@ class PreferencesDialog(QDialog):
         elif na == False:
             self.Pbase_file_name = "audio"
             self.ui.txt_filena.setText(self.Pbase_file_name)
-        #print(self.Pbase_file_name)
     
     @Slot()
     def set_cus_Pbase_file_name(self,na):
-        #print("set_cus_Pbase_file_name")
         self.Pbase_file_name = na
         
     #The idea is to set all the settings that are unaccessible to non-error state defaults.     #####Might need to change these after further development such as the IP settings
     @Slot()
     def set_Pmode(self,m):
-        #print("set_Pmode M is"+ str(m))
         if m == 1:
             self.Pmode = "Local"
             self.Premote_ip = "127.0.0.1"
@@ -647,7 +588,6 @@ class PreferencesDialog(QDialog):
             self.Psrv_prt = 8080
     
     def cur_Pmode(self,m):
-        #print("cur_Pmode")
         if m == "Local":
             self.ui.radioButton_3.setChecked(True)
         elif m == "Server":
@@ -671,7 +611,6 @@ class PreferencesDialog(QDialog):
         
     @Slot()
     def apply_pref(self, Pmode, Pbase_file_name, Psave_location,Ptranscript_file, Paudio_clips, Pline_num, Pcurrent_ip, Psrv_prt, Premote_ip, Premote_prt):
-        #print("applied")
         global base_file_name
         global save_location
         global transcript_file
