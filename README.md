@@ -32,3 +32,4 @@ Since these things are not a high priority for me to use this software it will l
 8) Restructure code so preferences are contained in an object, separate classes into different files.
    (The code is a bit messy)
 9) Verify/Test avalible audio setting options, particularly dtype when using sd
+10) Anchor UI elements to window for resizing. Verify size of rendered wav forms to fit window.
