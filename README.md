@@ -39,3 +39,4 @@ Since these things are not a high priority for me to use this software it will l
    (The code is a bit messy)
 9) Verify/Test avalible audio setting options, particularly dtype when using sd
 10) Anchor UI elements to window for resizing. Verify size of rendered wav forms to fit window.
+11) Delay when clicking record2 button. Test on different OS's to see if it is a system issue.
